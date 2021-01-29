@@ -1,65 +1,43 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
+import { parse } from 'node-html-parser';
+import axios from 'axios';
+import url from 'url'
 
-export default function Home() {
+Home.getInitialProps = async (ctx) => {
+  const user = url.parse(ctx.req.url, true).query.user || 'gumdad'
+
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = (now - start) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
+  const oneDay = 1000 * 60 * 60 * 24;
+  const day = Math.floor(diff / oneDay);  // current day of the year
+
+  const movies = await Promise.all(
+    [...Array(Math.ceil(day/32)).keys()]
+      .map(mo => 
+        axios.get(`https://letterboxd.com/${user}/films/diary/for/2021/${mo + 1}/`)
+             .then(resp => parse(resp.data).querySelectorAll('.diary-entry-row').length)
+      )
+    ).then(counts => counts.reduce((accumulator, currentValue) => accumulator + currentValue))
+
+  return { day, movies, user }
+}
+
+export default function Home({ movies, day, user }) {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Create Next App</title>
+        <title>2021 movies</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          <a href={`https://letterboxd.com/${user}/`}>{user}</a>
+          {` has watched ${movies} movies in ${day} days of 2021`}
         </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
       </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
     </div>
   )
 }
