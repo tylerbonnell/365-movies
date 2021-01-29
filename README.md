@@ -1,3 +1,6 @@
+I wanted to watch 365 movies this year. Movies are logged on Letterboxd, and this Vercel function will scrape Letterboxd to let me know how I'm doing. You can pass the `user` query parameter to specify a different Letterboxd account.
+
+## Boilerplate
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
