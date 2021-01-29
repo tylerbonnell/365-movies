@@ -8,13 +8,13 @@ Home.getInitialProps = async (ctx) => {
   const user = url.parse(ctx.req.url, true).query.user || 'gumdad'
 
   const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
+  const start = new Date(Date.parse('01 Jan 2021 00:00:00 GMT-8'));
   const diff = (now - start) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
   const oneDay = 1000 * 60 * 60 * 24;
-  const day = Math.floor(diff / oneDay);  // current day of the year
+  const day = Math.floor(diff / oneDay) + 1;  // current day of the year
 
   const movies = await Promise.all(
-    [...Array(Math.ceil(day/32)).keys()]
+    [...Array(Math.min(12, Math.ceil(day/32))).keys()]
       .map(mo => 
         axios.get(`https://letterboxd.com/${user}/films/diary/for/2021/${mo + 1}/`)
              .then(resp => parse(resp.data).querySelectorAll('.diary-entry-row').length)
