@@ -14,7 +14,7 @@ Home.getInitialProps = async (ctx) => {
   const day = Math.floor(diff / oneDay) + 1;  // current day of the year
 
   const movies = await Promise.all(
-    [...Array(Math.min(12, Math.ceil(day/32))).keys()]
+    [...Array(Math.min(12, Math.ceil(day/28))).keys()]
       .map(mo => 
         axios.get(`https://letterboxd.com/${user}/films/diary/for/2021/${mo + 1}/`)
              .then(resp => parse(resp.data).querySelectorAll('.diary-entry-row').length)
